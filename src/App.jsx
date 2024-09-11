@@ -10,7 +10,7 @@ import HeaderComponent from './components/HeaderComponent'
 import FooterComponent from './components/FooterComponent'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import EmployeeComponent from './components/EmployeeComponent'
-
+import cors from "cors";
 function App() {
   const [count, setCount] = useState(0)
 
@@ -27,6 +27,9 @@ function App() {
           <Route path='/add-Employee' element={<EmployeeComponent/>}>
 
           </Route>
+          <Route path='/edit-employee/:id' element={<EmployeeComponent/>}>
+
+          </Route>
         </Routes>
        
      </BrowserRouter>
@@ -36,6 +39,8 @@ function App() {
     </>
    
   )
+
+
 }
 
 export default App

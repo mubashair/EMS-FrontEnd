@@ -1,6 +1,6 @@
-import { useState } from "react"
-import { createEmployee } from "../services/EmployeeService"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { createEmployee, getEmployee, UpdateEmployee } from "../services/EmployeeService"
+import { useNavigate, useParams } from "react-router-dom"
 
 
 const EmployeeComponent = () => {
@@ -10,6 +10,7 @@ const EmployeeComponent = () => {
   const navigator = useNavigate();
   //validation errors state variables
   const[errors, setErrors] = useState({firstName:'', lastName:'', email:''})
+  const {id} = useParams();
   //const handleFirstName=(e)=>setFirstName(e.target.value);
   function handleLastName(e){
     setLastName(e.target.value);
@@ -17,16 +18,29 @@ const EmployeeComponent = () => {
   function handleEmail(e){
     setEmail(e.target.value);
   }
-  function saveEmployee(event){
+  function saveOrUpdateEmployee(event){
     event.preventDefault();
     if(validateForm()){
       const employee ={firstName, lastName, email}
-    console.log(employee)
+      console.log(employee)
+      if(id){
+        UpdateEmployee(id, employee)
+        .then((response)=>{
+          console.log(response.data);
+          navigator('/employees');
+        }).catch(error=>{
+          console.error(error);
+        })
+      }else{
+        createEmployee(employee).then((response)=>{
+          console.log(response.data)
+          navigator('/employees')
+        }).catch(error=>{
+          console.log(error);
+        })
+      }
 
-    createEmployee(employee).then((response)=>{
-      console.log(response.data)
-      navigator('/employees')
-    })
+    
     }//end if
     
 
@@ -56,12 +70,33 @@ const EmployeeComponent = () => {
     setErrors(errorsCopy);
     return valid;
   }//end function validate form
+  
+  function pageTitle(){
+    if(id){
+      return <h2 className="text-center">UpdateEmployee</h2>
+    }else{
+      return <h2 className="text-center">AddEmployee</h2>
+    }
+  }//end function pageTitle
+  useEffect(()=>{
+    if(id){
+      getEmployee(id).then((response)=>{
+        setFirstName(response.data.firstName);
+        setLastName(response.data.lastName);
+        setEmail(response.data.email);
+      }).catch(error=>{
+        console.log(error);
+      })
+    }
+}, [id])
   return (
     <div className="container">
       <br/><br/>
       <div className="row">
         <div className="card col-md-6 offset-md-3 offset-md-3">
-          <h2 className="text-center">Add Employee</h2>
+         {
+            pageTitle()
+         }
           <div className="card-body ">
             <form>
               <div className="form-group mb-2">
@@ -104,7 +139,7 @@ const EmployeeComponent = () => {
                 {errors.email && <div className="invalid-feedback">{errors.email}</div>}
               </div>
               <button className="btn btn-success"
-              onClick={saveEmployee}>Submit</button>
+              onClick={saveOrUpdateEmployee}>Submit</button>
             </form>
           </div>
         </div>
